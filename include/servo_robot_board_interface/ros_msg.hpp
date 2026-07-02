@@ -5,26 +5,25 @@
 #include <array>
 #include <algorithm>
 
-#include "quadhex_robot_board_interface/msg/config.hpp"
-#include "quadhex_robot_board_interface/msg/state.hpp"
-#include "quadhex_robot_board_interface/msg/charge_state.hpp"
-#include "quadhex_robot_board_interface/srv/modify_config.hpp"
+#include "servo_robot_board_interface/msg/config.hpp"
+#include "servo_robot_board_interface/msg/state.hpp"
+#include "servo_robot_board_interface/msg/charge_state.hpp"
+#include "servo_robot_board_interface/srv/modify_config.hpp"
 
-namespace quadhex_robot_board_interface {
+namespace servo_robot_board_interface {
 
-    /// 状态话题
+  
     inline const std::string TOPIC_BOARD_STATE = "/robot/board/state";
-    /// 配置话题
+    
     inline const std::string TOPIC_BOARD_CONFIG = "/robot/board/config";
-
-    /// 修改服务
+    
     inline const std::string SRV_COMPUTE_HAND_EYE_TRANSFORM = "/robot/board/modify_config";
     
-    // 类型别名
-    using Config = quadhex_robot_board_interfacecamera_interface::msg::Config;
-    using State = quadhex_robot_board_interfacecamera_interface::msg::State;
-    using ChargeState = quadhex_robot_board_interfacecamera_interface::msg::ChargeState;
-    using ModifyConfig = quadhex_robot_board_interfacecamera_interface::srv::ModifyConfig;
+    
+    using Config = servo_robot_board_interface::msg::Config;
+    using State = servo_robot_board_interface::msg::State;
+    using ChargeState = servo_robot_board_interface::msg::ChargeState;
+    using ModifyConfig = servo_robot_board_interface::srv::ModifyConfig;
     
 
 

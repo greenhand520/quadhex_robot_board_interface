@@ -1,14 +1,11 @@
 from enum import IntEnum
 
-# 状态话题
+
 TOPIC_BOARD_STATE = "/robot/board/state"
-# 配置话题
+
 TOPIC_BOARD_CONFIG = "/robot/board/config"
 
-# 修改服务
 SRV_COMPUTE_HAND_EYE_TRANSFORM = "/robot/board/modify_config"
-
-
 
 
 class ChargeStatus(IntEnum):
