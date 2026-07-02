@@ -32,14 +32,18 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME}
-)
-ament_export_include_directories(include/${PROJECT_NAME})
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME})
+  install(DIRECTORY include/${PROJECT_NAME}/
+          DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME}
+  )
+  ament_export_include_directories(include/${PROJECT_NAME})
+endif()
 
-install(DIRECTORY python/${PROJECT_NAME}_msg/
-        DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME}_msg
-)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/python/${PROJECT_NAME}_msg)
+  install(DIRECTORY python/${PROJECT_NAME}_msg/
+          DESTINATION ${PYTHON_INSTALL_DIR}/${PROJECT_NAME}_msg
+  )
+endif()
 
 
 ament_package()
