@@ -1,4 +1,5 @@
 # Query all configuration
 ---
 bool success
+string msg
 BoardConfig config

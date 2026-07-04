@@ -3,3 +3,4 @@ uint8 switch_type    # 0x10=ServoPower, 0x11=5VPower, 0x12=Charge, 0x13=BatExtOu
 bool   enable        # true=ON, false=OFF
 ---
 bool success
+string msg
