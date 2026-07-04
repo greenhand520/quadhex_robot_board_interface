@@ -1,0 +1,5 @@
+# Write configuration
+uint8 config_type    # ConfigType enum value (0x21-0x28)
+float32 value        # New value
+---
+bool success

@@ -1,0 +1,5 @@
+# Query single configuration
+uint8 config_type    # ConfigType enum value (0x21-0x28)
+---
+bool success
+float32 value

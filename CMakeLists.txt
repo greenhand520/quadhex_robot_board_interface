@@ -13,24 +13,17 @@ find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-        "msg/ChargerState.msg"
-        "msg/State.msg"
-        "msg/Config.msg"
-        "srv/ModifyConfig.srv"
+        msg/BoardPower.msg
+        msg/BoardThermal.msg
+        msg/BoardSystem.msg
+        msg/BoardEvent.msg
+        msg/BoardConfig.msg
+        srv/BoardQueryConfig.srv
+        srv/BoardQueryAllConfig.srv
+        srv/BoardWriteConfig.srv
+        srv/BoardSwitch.srv
         DEPENDENCIES builtin_interfaces std_msgs
 )
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME})
   install(DIRECTORY include/${PROJECT_NAME}/

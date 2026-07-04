@@ -1,146 +1,160 @@
 # servo_robot_board_interface
 
-A ROS 2 interface package for communication with the STM32 main control board of the robot with servo drive.
+ROS2 接口定义包，用于伺服机器人主板通信。
 
-## Overview
+**[English Version](README_en.md)**
 
-This package defines the message and service interfaces used to communicate with the robot's main control board. It provides real-time monitoring of board state, charging status, and configuration management.
+## 概述
 
-## Messages
+本包定义了 PC（ROS2 节点）与 STM32 主板之间的通信接口，包括：
+- **消息（msg）**：上行数据（STM32 → PC）
+- **服务（srv）**：下行操作（PC → STM32）
 
-### ChargerState.msg
+> 协议定义详见：[servo-robot-protocol](https://github.com/greenhand520/servo_robot_board_tools/tree/dev/crates/servo-robot-protocol)
 
-Status information from the BQ24725 charger IC.
+## 消息类型（上行数据）
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `header` | `std_msgs/Header` | Standard message header |
-| `ac_present` | `bool` | Whether the AC adapter is connected |
-| `charging` | `bool` | Whether it is currently charging |
-| `charge_current_a` | `float32` | Charging current setpoint (A) |
-| `charge_voltage_v` | `float32` | Charging voltage setpoint (V) |
-| `input_current_a` | `float32` | AC adapter input current limit (A) |
-| `realtime_current_a` | `float32` | Real-time charging current on battery side (A) |
-| `realtime_input_voltage_v` | `float32` | Real-time AC adapter input voltage (V) |
-| `charge_status` | `uint8` | Charging phase (see ChargeStatus enum) |
-| `temp` | `float32` | DC-DC temperature (°C) |
+| 消息 | 说明 | 更新频率 |
+|------|------|----------|
+| `BoardPower` | 电源数据（舵机/电池电压电流） | 20Hz |
+| `BoardThermal` | 温度数据（舵机/5V/MCU/充电/电池） | 5Hz |
+| `BoardSystem` | 系统信息（设备ID/运行时间/CPU/内存） | 1Hz |
+| `BoardEvent` | 事件通知（充电器/风扇/保护标志） | 触发式 |
+| `BoardConfig` | 配置快照（所有配置参数+开关状态） | 事件触发 |
 
-**Charge Status Values:**
+## 服务类型（下行操作）
 
-| Value | Status |
-|-------|--------|
-| 0 | Unknown |
-| 1 | Not Charged |
-| 2 | Pre-Charge |
-| 3 | CC (Constant Current) |
-| 4 | CV (Constant Voltage) |
-| 5 | Full |
-| 6 | HUSB238A Fault |
-| 7 | Charger Unsupported |
+| 服务 | 说明 |
+|------|------|
+| `BoardQueryConfig` | 查询单个配置参数 |
+| `BoardQueryAllConfig` | 查询所有配置参数 |
+| `BoardWriteConfig` | 写入配置参数 |
+| `BoardSwitch` | 开关操作（舵机电源/5V/充电/电池额外输出） |
 
-### State.msg
+## 话题和服务名称
 
-STM32 board information and state.
+### 话题
+```
+/robot/board/power      # 电源数据
+/robot/board/thermal    # 温度数据
+/robot/board/system     # 系统信息
+/robot/board/event      # 事件通知
+/robot/board/config     # 配置快照
+```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `header` | `std_msgs/Header` | Standard message header |
-| `servo_power_temp` | `float32` | Servo DC-DC temperature (°C) |
-| `mcu_temp` | `float32` | STM32 MCU temperature (°C) |
-| `power_5v_temp` | `float32` | 5V output DC-DC temperature (°C) |
-| `servo_power_voltage_v` | `float32` | Servo DC-DC output voltage (V) |
-| `servo_power_current_a` | `float32` | Servo DC-DC output current (A) |
-| `charger_state` | `ChargerState` | Charger state information |
+### 服务
+```
+/robot/board/query_config       # 查询单个配置
+/robot/board/query_all_config   # 查询所有配置
+/robot/board/write_config       # 写入配置
+/robot/board/switch             # 开关操作
+```
 
-### Config.msg
-
-Configuration parameters for the board.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `charge_current_limit_a` | `float32` | Battery charging current limit (A) |
-| `charge_voltage_limit_v` | `float32` | Battery charging voltage limit (V) |
-| `charge_protection_temp` | `float32` | Charging protection temperature (°C) |
-| `charge_protection_temp_limit` | `float32` | Charging temperature limit (°C) |
-| `servo_power_temp_limit` | `float32` | Servo power supply temperature limit (°C) |
-| `servo_power_current_limit` | `float32` | Servo power supply current limit (A) |
-| `power_5v_temp_limit` | `float32` | 5V power supply temperature limit (°C) |
-
-## Services
-
-### ModifyConfig.srv
-
-Modify the board configuration.
-
-**Request:**
-- `new_config` (Config): New configuration to apply
-
-**Response:**
-- `success` (bool): Whether the configuration was successfully modified
-
-## Topics
-
-| Topic | Type | Description |
-|-------|------|-------------|
-| `/robot/board/state` | `State` | Board state information |
-| `/robot/board/config` | `Config` | Board configuration |
-
-## Services
-
-| Service | Type | Description |
-|---------|------|-------------|
-| `/robot/board/modify_config` | `ModifyConfig` | Modify board configuration |
-
-## Helper Utilities
-
-### C++ (Header-only)
+## C++ 使用示例
 
 ```cpp
 #include "servo_robot_board_interface/ros_msg.hpp"
 
 using namespace servo_robot_board_interface;
 
-// Type aliases
-Config config_msg;
-State state_msg;
-ChargeState charge_msg;
+// 订阅电源数据
+auto sub = node->create_subscription<PowerMsg>(
+    TOPIC_BOARD_POWER, 10,
+    [](const PowerMsg::SharedPtr msg) {
+        RCLCPP_INFO(node->get_logger(), "Voltage: %.1fV", msg->servo_voltage);
+    });
 
-// Charge status conversion
-ChargeStatus status = ChargeStatus::CC;
-const char* status_str = charge_status_to_str(status);  // "CC"
-
-ChargeStatus parsed = str_to_charge_status("FULL");  // ChargeStatus::FULL
+// 查询配置
+auto client = node->create_client<QueryConfigSrv>(SERVICE_QUERY_CONFIG);
+auto request = std::make_shared<QueryConfigSrv::Request>();
+request->config_type = static_cast<uint8_t>(ConfigType::POWER_SERVO_CURRENT_LIMIT);
+auto result = client->async_send_request(request);
 ```
 
-### Python
+## Python 使用示例
 
 ```python
-from servo_robot_board_interface_msg.ros_msg import ChargeStatus
+from servo_robot_board_interface_msg.ros_msg import *
 
-# Enum usage
-status = ChargeStatus.CC
-print(status)  # "CC"
+# 订阅电源数据
+sub = node.create_subscription(
+    BoardPower,
+    TOPIC_BOARD_POWER,
+    lambda msg: print(f"Voltage: {msg.servo_voltage:.1f}V"),
+    10
+)
 
-# Parse from string
-parsed = ChargeStatus.from_str("full")  # ChargeStatus.FULL
+# 查询配置
+client = node.create_client(BoardQueryConfig, SERVICE_QUERY_CONFIG)
+request = BoardQueryConfig.Request()
+request.config_type = ConfigType.POWER_SERVO_CURRENT_LIMIT
+future = client.call_async(request)
 ```
 
-## Dependencies
+## 枚举类型
 
-- ROS 2 (Humble or later)
-- `std_msgs`
-- `sensor_msgs`
-- `builtin_interfaces`
-- `rosidl_default_generators`
+### ChargePhase（充电阶段）
+| 值 | 名称 | 说明 |
+|----|------|------|
+| 0 | Unknown | 未知 |
+| 1 | NotCharging | 未充电 |
+| 2 | PreCharge | 预充电 |
+| 3 | Cc | 恒流充电 |
+| 4 | Cv | 恒压充电 |
+| 5 | Full | 充满 |
+| 6 | Husb238Fault | 充电芯片故障 |
+| 7 | Unsupported | 不支持 |
 
-## Building
+### ProtectionFlag（保护标志）
+| 位 | 名称 | 说明 |
+|----|------|------|
+| 0 | SERVO_OVERCURRENT | 舵机过流 |
+| 1 | SERVO_THERMAL | 舵机过热 |
+| 2 | DCDC_5V_THERMAL | 5V过热 |
+| 3 | CHARGE_DERATING | 充电降流 |
+| 4 | CHARGE_THERMAL | 充电过热 |
+| 5 | BATTERY_LOW | 电池低电量 |
+
+### ConfigType（配置类型）
+| 值 | 名称 | 单位 |
+|----|------|------|
+| 0x01 | Reset | - |
+| 0x02 | Shutdown | - |
+| 0x10 | SwitchServoPower | bool |
+| 0x11 | Switch5VPower | bool |
+| 0x12 | SwitchCharge | bool |
+| 0x13 | SwitchBatExtOut | bool |
+| 0x21 | PowerServoCurrentLimit | A |
+| 0x22 | PowerServoTempLimit | °C |
+| 0x23 | Power5vTempLimit | °C |
+| 0x24 | ChargeMaxCurrent | A |
+| 0x25 | ChargeTempDerating | °C |
+| 0x26 | ChargeTempLimit | °C |
+| 0x27 | ChargeStopVoltage | V |
+| 0x28 | ChargeStopCapacity | % |
+
+### SwitchType（开关类型）
+| 值 | 名称 | 说明 |
+|----|------|------|
+| 0x10 | ServoPower | 舵机电源 |
+| 0x11 | 5VPower | 5V电源 |
+| 0x12 | Charge | 充电 |
+| 0x13 | BatExtOut | 电池额外输出 |
+
+## 构建
 
 ```bash
-cd ~/servo_robot_board_ws
-colcon build --packages-select servo_robot_board_interface --cmake-args -Wno-dev 
+cd your_ros_ws
+colcon build --packages-select servo_robot_board_interface 
 source install/setup.bash
 ```
 
+## 依赖
+
+- `std_msgs`
+- `rosidl_default_generators`
+- `rosidl_default_runtime`
+
 ## License
 
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+GPL-3.0

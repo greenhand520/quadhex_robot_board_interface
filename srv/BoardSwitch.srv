@@ -1,0 +1,5 @@
+# Switch operation (servo power, 5V, charge, bat ext out)
+uint8 switch_type    # 0x10=ServoPower, 0x11=5VPower, 0x12=Charge, 0x13=BatExtOut
+bool   enable        # true=ON, false=OFF
+---
+bool success
