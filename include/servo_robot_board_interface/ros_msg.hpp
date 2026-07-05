@@ -10,6 +10,7 @@
 #include "servo_robot_board_interface/msg/board_thermal.hpp"
 #include "servo_robot_board_interface/msg/board_system.hpp"
 #include "servo_robot_board_interface/msg/board_event.hpp"
+#include "servo_robot_board_interface/msg/board_log.hpp"
 #include "servo_robot_board_interface/msg/board_config.hpp"
 
 // Service includes
@@ -25,6 +26,7 @@ namespace servo_robot_board_interface {
     inline const std::string TOPIC_BOARD_THERMAL = "/robot/board/thermal";
     inline const std::string TOPIC_BOARD_SYSTEM = "/robot/board/system";
     inline const std::string TOPIC_BOARD_EVENT = "/robot/board/event";
+    inline const std::string TOPIC_BOARD_LOG = "/robot/board/log";
     inline const std::string TOPIC_BOARD_CONFIG = "/robot/board/config";
 
     // Service names
@@ -38,6 +40,7 @@ namespace servo_robot_board_interface {
     using ThermalMsg = msg::BoardThermal;
     using SystemMsg = msg::BoardSystem;
     using EventMsg = msg::BoardEvent;
+    using LogMsg = msg::BoardLog;
     using ConfigMsg = msg::BoardConfig;
 
     using QueryConfigSrv = srv::BoardQueryConfig;

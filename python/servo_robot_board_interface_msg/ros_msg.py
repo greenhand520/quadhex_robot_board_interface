@@ -18,6 +18,7 @@ TOPIC_BOARD_POWER = "/robot/board/power"
 TOPIC_BOARD_THERMAL = "/robot/board/thermal"
 TOPIC_BOARD_SYSTEM = "/robot/board/system"
 TOPIC_BOARD_EVENT = "/robot/board/event"
+TOPIC_BOARD_LOG = "/robot/board/log";
 TOPIC_BOARD_CONFIG = "/robot/board/config"
 
 # Service names
