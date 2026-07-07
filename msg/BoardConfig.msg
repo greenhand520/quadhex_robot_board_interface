@@ -16,3 +16,4 @@ bool    charge_on              # Charge state
 bool    bat_ext_out_on         # Battery extra output state
 bool    reset                  # reset
 bool    shutdown               # shutdown
+uint8   tx_log_level           # The log level sent by mcu to the host computer（0: OFF 1:DEBUG 2:INFO 3:WARN 4:ERROR）

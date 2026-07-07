@@ -132,6 +132,7 @@ future = client.call_async(request)
 | 0x26 | ChargeTempLimit | °C |
 | 0x27 | ChargeStopVoltage | V |
 | 0x28 | ChargeStopCapacity | % |
+| 0x29 | TxLogLevel | - |
 
 ### SwitchType（开关类型）
 | 值 | 名称 | 说明 |
